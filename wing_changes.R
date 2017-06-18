@@ -34,30 +34,29 @@ names(results)-> column.names
 results <- data.frame(matrix(unlist(results), nrow=dim(results)[1], byrow=F))
 colnames(results) <- column.names
 
-## identify max distance based on axis 
-# assume wing base is the last point max(results$ID.x) 
-# (because the first wing point has been at the top of the wing base axis)   
-last.point = max(results$ID.x)
+## identify max distance starting from the wing base
+# Wing base is the last point clicked, because the first point is at the leading edge of the wing. The last point would be immediately before the leading edge, near the wing base.   
+wingbase_ID = max(results$ID.x)
 
-# results[results$ID.x %in% last.point,] # only select those where starting pt is last pt
-# results[results$ID.x %in% last.point,][7]  # column 7 are the calculated distances
-# max(results[results$ID.x %in% last.point,][7]) # maximum of the calculated distances
+# results[results$ID.x %in% wingbase_ID,] # only select those where starting pt is last pt
+# results[results$ID.x %in% wingbase_ID,][7]  # column 7 are the calculated distances
+# max(results[results$ID.x %in% wingbase_ID,][7]) # maximum of the calculated distances
 
-maxID <- which( results$ID.x==last.point & 
-                 results$dist == max(results[results$ID.x %in% last.point,][7]))
+maxID <- which( results$ID.x==wingbase_ID & 
+                 results$dist == max(results[results$ID.x %in% wingbase_ID,][7]))
 
 ## x, y coordinates of wing base & wing tip
-wl.base <- data.frame(x=results[maxID,2],y=results[maxID,3]) 
-wl.tip  <- data.frame(x=results[maxID,5],y=results[maxID,6]) 
+wing_base <- data.frame(x=results[maxID,2],y=results[maxID,3]) 
+wing_tip  <- data.frame(x=results[maxID,5],y=results[maxID,6]) 
 
 
 ## plot and view imported shape ====
 plot(x, y, type = "n", xlab = "Time", ylab = "Distance")
 polygon(x, y, col = "gray", border = "red")
-lines(c(wl.base$x,wl.tip$x), c(wl.base$y,wl.tip$y), col =3)
+lines(c(wing_base$x,wing_tip$x), c(wing_base$y,wing_tip$y), col =3)
 
-# points(wl.base$x,wl.base$y)
-# points(wl.tip$x,wl.tip$y)
+# points(wing_base$x,wing_base$y)
+# points(wing_tip$x,wing_tip$y)
 # Cool functions
 rad2deg <- function(rad) {(rad * 180) / (pi)}
 deg2rad <- function(deg) {(deg * pi) / (180)}
@@ -69,7 +68,7 @@ M <- cbind(x,y)
 #plot data
 plot(M[,1],M[,2],xlim=c(1500,3500),ylim=c(2000,4000))
 #Rotation angle calculated:
-alpha<- atan(wl.base$y/wl.tip$x)
+alpha<- atan(wing_base$y/wing_tip$x)
 #Rotation matrix
 rotm <- matrix(c(cos(alpha),sin(alpha),-sin(alpha),cos(alpha)),ncol=2)
 #shift, rotate, shift back
@@ -79,9 +78,9 @@ M2 <- t(rotm %*% (
 #plot rotated wing
 points(M2[,1],M2[,2],xlim=c(1500,3500),ylim=c(2000,4000), col = 2)
 # check straight line based on original segment position
-lines(1500:3500, rep(wl.base$y,2001)) 
+lines(1500:3500, rep(wing_base$y,2001)) 
 # draw original wing segment
-lines(c(wl.base$x,wl.tip$x), c(wl.base$y,wl.tip$y), col =3)
+lines(c(wing_base$x,wing_tip$x), c(wing_base$y,wing_tip$y), col =3)
 
 
   
